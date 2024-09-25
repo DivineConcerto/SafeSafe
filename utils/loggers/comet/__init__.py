@@ -219,7 +219,7 @@ class CometLogger:
         self.experiment.log_asset_data(asset, **kwargs)
 
     def log_image(self, img, **kwargs):
-        """Logs an image to the current experiment with optional kwargs."""
+        """Logs an images to the current experiment with optional kwargs."""
         self.experiment.log_image(img, **kwargs)
 
     def log_model(self, path, opt, epoch, fitness_score, best_model=False):
@@ -260,7 +260,7 @@ class CometLogger:
         return check_dataset(data_file)
 
     def log_predictions(self, image, labelsn, path, shape, predn):
-        """Logs predictions with IOU filtering, given image, labels, path, shape, and predictions."""
+        """Logs predictions with IOU filtering, given images, labels, path, shape, and predictions."""
         if self.logged_images_count >= self.max_images:
             return
         detections = predn[predn[:, 4] > self.conf_thres]
@@ -321,7 +321,7 @@ class CometLogger:
         return predn, labelsn
 
     def add_assets_to_artifact(self, artifact, path, asset_path, split):
-        """Adds image and label assets to a wandb artifact given dataset split and paths."""
+        """Adds images and label assets to a wandb artifact given dataset split and paths."""
         img_paths = sorted(glob.glob(f"{asset_path}/*"))
         label_paths = img2label_paths(img_paths)
 
@@ -447,7 +447,7 @@ class CometLogger:
         """Logs metadata and optionally saves model files at the end of training."""
         if self.comet_log_predictions:
             curr_epoch = self.experiment.curr_epoch
-            self.experiment.log_asset_data(self.metadata_dict, "image-metadata.json", epoch=curr_epoch)
+            self.experiment.log_asset_data(self.metadata_dict, "images-metadata.json", epoch=curr_epoch)
 
         for f in files:
             self.log_asset(f, metadata={"epoch": epoch})

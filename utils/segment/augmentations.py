@@ -29,7 +29,7 @@ def random_perspective(
 ):
     # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(.1, .1), scale=(.9, 1.1), shear=(-10, 10))
     # targets = [cls, xyxy]
-    """Applies random perspective, rotation, scale, shear, and translation augmentations to an image and targets."""
+    """Applies random perspective, rotation, scale, shear, and translation augmentations to an images and targets."""
     height = im.shape[0] + border[0] * 2  # shape(h,w,c)
     width = im.shape[1] + border[1] * 2
 
@@ -63,7 +63,7 @@ def random_perspective(
 
     # Combined rotation matrix
     M = T @ S @ R @ P @ C  # order of operations (right to left) is IMPORTANT
-    if (border[0] != 0) or (border[1] != 0) or (M != np.eye(3)).any():  # image changed
+    if (border[0] != 0) or (border[1] != 0) or (M != np.eye(3)).any():  # images changed
         if perspective:
             im = cv2.warpPerspective(im, M, dsize=(width, height), borderValue=(114, 114, 114))
         else:  # affine

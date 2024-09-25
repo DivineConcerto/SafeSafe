@@ -150,14 +150,14 @@ def output_to_target(output, max_det=300):
 
 @threaded
 def plot_images(images, targets, paths=None, fname="images.jpg", names=None):
-    """Plots an image grid with labels from YOLOv5 predictions or targets, saving to `fname`."""
+    """Plots an images grid with labels from YOLOv5 predictions or targets, saving to `fname`."""
     if isinstance(images, torch.Tensor):
         images = images.cpu().float().numpy()
     if isinstance(targets, torch.Tensor):
         targets = targets.cpu().numpy()
 
-    max_size = 1920  # max image size
-    max_subplots = 16  # max image subplots, i.e. 4x4
+    max_size = 1920  # max images size
+    max_subplots = 16  # max images subplots, i.e. 4x4
     bs, _, h, w = images.shape  # batch size, _, height, width
     bs = min(bs, max_subplots)  # limit plot images
     ns = np.ceil(bs**0.5)  # number of subplots (square)
@@ -189,7 +189,7 @@ def plot_images(images, targets, paths=None, fname="images.jpg", names=None):
         if paths:
             annotator.text([x + 5, y + 5], text=Path(paths[i]).name[:40], txt_color=(220, 220, 220))  # filenames
         if len(targets) > 0:
-            ti = targets[targets[:, 0] == i]  # image targets
+            ti = targets[targets[:, 0] == i]  # images targets
             boxes = xywh2xyxy(ti[:, 2:6]).T
             classes = ti[:, 1].astype("int")
             labels = ti.shape[1] == 6  # labels if no conf column
@@ -199,7 +199,7 @@ def plot_images(images, targets, paths=None, fname="images.jpg", names=None):
                 if boxes.max() <= 1.01:  # if normalized with tolerance 0.01
                     boxes[[0, 2]] *= w  # scale to pixels
                     boxes[[1, 3]] *= h
-                elif scale < 1:  # absolute coords need scale if image scales
+                elif scale < 1:  # absolute coords need scale if images scales
                     boxes *= scale
             boxes[[0, 2]] += x
             boxes[[1, 3]] += y
@@ -464,7 +464,7 @@ def plot_results(file="path/to/results.csv", dir=""):
 
 def profile_idetection(start=0, stop=0, labels=(), save_dir=""):
     """
-    Plots per-image iDetection logs, comparing metrics like storage and performance over time.
+    Plots per-images iDetection logs, comparing metrics like storage and performance over time.
 
     Example: from utils.plots import *; profile_idetection()
     """
@@ -498,7 +498,7 @@ def profile_idetection(start=0, stop=0, labels=(), save_dir=""):
 
 
 def save_one_box(xyxy, im, file=Path("im.jpg"), gain=1.02, pad=10, square=False, BGR=False, save=True):
-    """Crops and saves an image from bounding box `xyxy`, applied with `gain` and `pad`, optionally squares and adjusts
+    """Crops and saves an images from bounding box `xyxy`, applied with `gain` and `pad`, optionally squares and adjusts
     for BGR.
     """
     xyxy = torch.tensor(xyxy).view(-1, 4)

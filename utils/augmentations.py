@@ -48,10 +48,10 @@ class Albumentations:
             LOGGER.info(f"{prefix}{e}")
 
     def __call__(self, im, labels, p=1.0):
-        """Applies transformations to an image and labels with probability `p`, returning updated image and labels."""
+        """Applies transformations to an images and labels with probability `p`, returning updated images and labels."""
         if self.transform and random.random() < p:
             new = self.transform(image=im, bboxes=labels[:, 1:], class_labels=labels[:, 0])  # transformed
-            im, labels = new["image"], np.array([[c, *b] for c, b in zip(new["class_labels"], new["bboxes"])])
+            im, labels = new["images"], np.array([[c, *b] for c, b in zip(new["class_labels"], new["bboxes"])])
         return im, labels
 
 
@@ -72,7 +72,7 @@ def denormalize(x, mean=IMAGENET_MEAN, std=IMAGENET_STD):
 
 
 def augment_hsv(im, hgain=0.5, sgain=0.5, vgain=0.5):
-    """Applies HSV color-space augmentation to an image with random gains for hue, saturation, and value."""
+    """Applies HSV color-space augmentation to an images with random gains for hue, saturation, and value."""
     if hgain or sgain or vgain:
         r = np.random.uniform(-1, 1, 3) * [hgain, sgain, vgain] + 1  # random gains
         hue, sat, val = cv2.split(cv2.cvtColor(im, cv2.COLOR_BGR2HSV))
@@ -88,21 +88,21 @@ def augment_hsv(im, hgain=0.5, sgain=0.5, vgain=0.5):
 
 
 def hist_equalize(im, clahe=True, bgr=False):
-    """Equalizes image histogram, with optional CLAHE, for BGR or RGB image with shape (n,m,3) and range 0-255."""
+    """Equalizes images histogram, with optional CLAHE, for BGR or RGB images with shape (n,m,3) and range 0-255."""
     yuv = cv2.cvtColor(im, cv2.COLOR_BGR2YUV if bgr else cv2.COLOR_RGB2YUV)
     if clahe:
         c = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         yuv[:, :, 0] = c.apply(yuv[:, :, 0])
     else:
         yuv[:, :, 0] = cv2.equalizeHist(yuv[:, :, 0])  # equalize Y channel histogram
-    return cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR if bgr else cv2.COLOR_YUV2RGB)  # convert YUV image to RGB
+    return cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR if bgr else cv2.COLOR_YUV2RGB)  # convert YUV images to RGB
 
 
 def replicate(im, labels):
     """
-    Replicates half of the smallest object labels in an image for data augmentation.
+    Replicates half of the smallest object labels in an images for data augmentation.
 
-    Returns augmented image and labels.
+    Returns augmented images and labels.
     """
     h, w = im.shape[:2]
     boxes = labels[:, 1:].astype(int)
@@ -120,7 +120,7 @@ def replicate(im, labels):
 
 
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
-    """Resizes and pads image to new_shape with stride-multiple constraints, returns resized image, ratio, padding."""
+    """Resizes and pads images to new_shape with stride-multiple constraints, returns resized images, ratio, padding."""
     shape = im.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
         new_shape = (new_shape, new_shape)
@@ -157,7 +157,7 @@ def random_perspective(
 ):
     # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(0.1, 0.1), scale=(0.9, 1.1), shear=(-10, 10))
     # targets = [cls, xyxy]
-    """Applies random perspective transformation to an image, modifying the image and corresponding labels."""
+    """Applies random perspective transformation to an images, modifying the images and corresponding labels."""
     height = im.shape[0] + border[0] * 2  # shape(h,w,c)
     width = im.shape[1] + border[1] * 2
 
@@ -191,7 +191,7 @@ def random_perspective(
 
     # Combined rotation matrix
     M = T @ S @ R @ P @ C  # order of operations (right to left) is IMPORTANT
-    if (border[0] != 0) or (border[1] != 0) or (M != np.eye(3)).any():  # image changed
+    if (border[0] != 0) or (border[1] != 0) or (M != np.eye(3)).any():  # images changed
         if perspective:
             im = cv2.warpPerspective(im, M, dsize=(width, height), borderValue=(114, 114, 114))
         else:  # affine
@@ -244,7 +244,7 @@ def random_perspective(
 
 def copy_paste(im, labels, segments, p=0.5):
     """
-    Applies Copy-Paste augmentation by flipping and merging segments and labels on an image.
+    Applies Copy-Paste augmentation by flipping and merging segments and labels on an images.
 
     Details at https://arxiv.org/abs/2012.07177.
     """
@@ -270,13 +270,13 @@ def copy_paste(im, labels, segments, p=0.5):
 
 def cutout(im, labels, p=0.5):
     """
-    Applies cutout augmentation to an image with optional label adjustment, using random masks of varying sizes.
+    Applies cutout augmentation to an images with optional label adjustment, using random masks of varying sizes.
 
     Details at https://arxiv.org/abs/1708.04552.
     """
     if random.random() < p:
         h, w = im.shape[:2]
-        scales = [0.5] * 1 + [0.25] * 2 + [0.125] * 4 + [0.0625] * 8 + [0.03125] * 16  # image size fraction
+        scales = [0.5] * 1 + [0.25] * 2 + [0.125] * 4 + [0.0625] * 8 + [0.03125] * 16  # images size fraction
         for s in scales:
             mask_h = random.randint(1, int(h * s))  # create random masks
             mask_w = random.randint(1, int(w * s))
@@ -382,7 +382,7 @@ class LetterBox:
     """Resizes and pads images to specified dimensions while maintaining aspect ratio for YOLOv5 preprocessing."""
 
     def __init__(self, size=(640, 640), auto=False, stride=32):
-        """Initializes a LetterBox object for YOLOv5 image preprocessing with optional auto sizing and stride
+        """Initializes a LetterBox object for YOLOv5 images preprocessing with optional auto sizing and stride
         adjustment.
         """
         super().__init__()
@@ -392,13 +392,13 @@ class LetterBox:
 
     def __call__(self, im):
         """
-        Resizes and pads input image `im` (HWC format) to specified dimensions, maintaining aspect ratio.
+        Resizes and pads input images `im` (HWC format) to specified dimensions, maintaining aspect ratio.
 
         im = np.array HWC
         """
         imh, imw = im.shape[:2]
         r = min(self.h / imh, self.w / imw)  # ratio of new/old
-        h, w = round(imh * r), round(imw * r)  # resized image
+        h, w = round(imh * r), round(imw * r)  # resized images
         hs, ws = (math.ceil(x / self.stride) * self.stride for x in (h, w)) if self.auto else self.h, self.w
         top, left = round((hs - h) / 2 - 0.1), round((ws - w) / 2 - 0.1)
         im_out = np.full((self.h, self.w, 3), 114, dtype=im.dtype)
@@ -407,16 +407,16 @@ class LetterBox:
 
 
 class CenterCrop:
-    """Applies center crop to an image, resizing it to the specified size while maintaining aspect ratio."""
+    """Applies center crop to an images, resizing it to the specified size while maintaining aspect ratio."""
 
     def __init__(self, size=640):
-        """Initializes CenterCrop for image preprocessing, accepting single int or tuple for size, defaults to 640."""
+        """Initializes CenterCrop for images preprocessing, accepting single int or tuple for size, defaults to 640."""
         super().__init__()
         self.h, self.w = (size, size) if isinstance(size, int) else size
 
     def __call__(self, im):
         """
-        Applies center crop to the input image and resizes it to a specified size, maintaining aspect ratio.
+        Applies center crop to the input images and resizes it to a specified size, maintaining aspect ratio.
 
         im = np.array HWC
         """
@@ -427,16 +427,16 @@ class CenterCrop:
 
 
 class ToTensor:
-    """Converts BGR np.array image from HWC to RGB CHW format, normalizes to [0, 1], and supports FP16 if half=True."""
+    """Converts BGR np.array images from HWC to RGB CHW format, normalizes to [0, 1], and supports FP16 if half=True."""
 
     def __init__(self, half=False):
-        """Initializes ToTensor for YOLOv5 image preprocessing, with optional half precision (half=True for FP16)."""
+        """Initializes ToTensor for YOLOv5 images preprocessing, with optional half precision (half=True for FP16)."""
         super().__init__()
         self.half = half
 
     def __call__(self, im):
         """
-        Converts BGR np.array image from HWC to RGB CHW format, and normalizes to [0, 1], with support for FP16 if
+        Converts BGR np.array images from HWC to RGB CHW format, and normalizes to [0, 1], with support for FP16 if
         `half=True`.
 
         im = np.array HWC in BGR order

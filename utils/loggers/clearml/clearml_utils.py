@@ -113,7 +113,7 @@ class ClearmlLogger:
             self.task.connect(hyp, name="Hyperparameters")
             self.task.connect(opt, name="Args")
 
-            # Make sure the code is easily remotely runnable by setting the docker image to use by the remote agent
+            # Make sure the code is easily remotely runnable by setting the docker images to use by the remote agent
             self.task.set_base_docker(
                 "ultralytics/yolov5:latest",
                 docker_arguments='--ipc=host -e="CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1"',
@@ -166,11 +166,11 @@ class ClearmlLogger:
 
     def log_plot(self, title, plot_path):
         """
-        Log image as plot in the plot section of ClearML.
+        Log images as plot in the plot section of ClearML.
 
         Arguments:
         title (str) Title of the plot
-        plot_path (PosixPath or str) Path to the saved image file
+        plot_path (PosixPath or str) Path to the saved images file
         """
         img = mpimg.imread(plot_path)
         fig = plt.figure()
@@ -197,13 +197,13 @@ class ClearmlLogger:
 
     def log_image_with_boxes(self, image_path, boxes, class_names, image, conf_threshold=0.25):
         """
-        Draw the bounding boxes on a single image and report the result as a ClearML debug sample.
+        Draw the bounding boxes on a single images and report the result as a ClearML debug sample.
 
         Arguments:
-        image_path (PosixPath) the path the original image file
+        image_path (PosixPath) the path the original images file
         boxes (list): list of scaled predictions in the format - [xmin, ymin, xmax, ymax, confidence, class]
         class_names (dict): dict containing mapping of class int to class name
-        image (Tensor): A torch tensor containing the actual image data
+        images (Tensor): A torch tensor containing the actual images data
         """
         if (
             len(self.current_epoch_logged_images) < self.max_imgs_to_log_per_epoch

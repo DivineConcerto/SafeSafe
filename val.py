@@ -69,7 +69,7 @@ def save_one_txt(predn, save_conf, shape, file):
         predn (torch.Tensor): Predicted bounding boxes and associated confidence scores and classes in xyxy format, tensor
             of shape (N, 6) where N is the number of detections.
         save_conf (bool): If True, saves the confidence scores along with the bounding box coordinates.
-        shape (tuple): Shape of the original image as (height, width).
+        shape (tuple): Shape of the original images as (height, width).
         file (str | Path): File path where the result will be saved.
 
     Returns:
@@ -78,7 +78,7 @@ def save_one_txt(predn, save_conf, shape, file):
     Notes:
         The xyxy bounding box format represents the coordinates (xmin, ymin, xmax, ymax).
         The xywh format represents the coordinates (center_x, center_y, width, height) and is normalized by the width and
-        height of the image.
+        height of the images.
 
     Example:
         ```python
@@ -96,13 +96,13 @@ def save_one_txt(predn, save_conf, shape, file):
 
 def save_one_json(predn, jdict, path, class_map):
     """
-    Saves a single JSON detection result, including image ID, category ID, bounding box, and confidence score.
+    Saves a single JSON detection result, including images ID, category ID, bounding box, and confidence score.
 
     Args:
         predn (torch.Tensor): Predicted detections in xyxy format with shape (n, 6) where n is the number of detections.
                               The tensor should contain [x_min, y_min, x_max, y_max, confidence, class_id] for each detection.
         jdict (list[dict]): List to collect JSON formatted detection results.
-        path (pathlib.Path): Path object of the image file, used to extract image_id.
+        path (pathlib.Path): Path object of the images file, used to extract image_id.
         class_map (dict[int, int]): Mapping from model class indices to dataset-specific category IDs.
 
     Returns:
@@ -192,7 +192,7 @@ def run(
     imgsz=640,  # inference size (pixels)
     conf_thres=0.001,  # confidence threshold
     iou_thres=0.6,  # NMS IoU threshold
-    max_det=300,  # maximum detections per image
+    max_det=300,  # maximum detections per images
     task="val",  # train, val, test, speed or study
     device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     workers=8,  # max dataloader workers (per RANK in DDP mode)
@@ -224,10 +224,10 @@ def run(
             TorchScript, ONNX, OpenVINO, TensorRT, CoreML, TensorFlow SavedModel, TensorFlow GraphDef, TensorFlow Lite,
             TensorFlow Edge TPU, and PaddlePaddle.
         batch_size (int, optional): Batch size for inference. Default is 32.
-        imgsz (int, optional): Input image size (pixels). Default is 640.
+        imgsz (int, optional): Input images size (pixels). Default is 640.
         conf_thres (float, optional): Confidence threshold for object detection. Default is 0.001.
         iou_thres (float, optional): IoU threshold for Non-Maximum Suppression (NMS). Default is 0.6.
-        max_det (int, optional): Maximum number of detections per image. Default is 300.
+        max_det (int, optional): Maximum number of detections per images. Default is 300.
         task (str, optional): Task type - 'train', 'val', 'test', 'speed', or 'study'. Default is 'val'.
         device (str, optional): Device to use for computation, e.g., '0' or '0,1,2,3' for CUDA or 'cpu' for CPU. Default is ''.
         workers (int, optional): Number of dataloader workers. Default is 8.
@@ -269,7 +269,7 @@ def run(
         # Load model
         model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
         stride, pt, jit, engine = model.stride, model.pt, model.jit, model.engine
-        imgsz = check_img_size(imgsz, s=stride)  # check image size
+        imgsz = check_img_size(imgsz, s=stride)  # check images size
         half = model.fp16  # FP16 supported on limited backends with CUDA
         if engine:
             batch_size = model.batch_size
@@ -418,10 +418,10 @@ def run(
             LOGGER.info(pf % (names[c], seen, nt[c], p[i], r[i], ap50[i], ap[i]))
 
     # Print speeds
-    t = tuple(x.t / seen * 1e3 for x in dt)  # speeds per image
+    t = tuple(x.t / seen * 1e3 for x in dt)  # speeds per images
     if not training:
         shape = (batch_size, 3, imgsz, imgsz)
-        LOGGER.info(f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {shape}" % t)
+        LOGGER.info(f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per images at shape {shape}" % t)
 
     # Plots
     if plots:
@@ -448,7 +448,7 @@ def run(
             pred = anno.loadRes(pred_json)  # init predictions api
             eval = COCOeval(anno, pred, "bbox")
             if is_coco:
-                eval.params.imgIds = [int(Path(x).stem) for x in dataloader.dataset.im_files]  # image IDs to evaluate
+                eval.params.imgIds = [int(Path(x).stem) for x in dataloader.dataset.im_files]  # images IDs to evaluate
             eval.evaluate()
             eval.accumulate()
             eval.summarize()
@@ -475,10 +475,10 @@ def parse_opt():
         data (str, optional): Path to the dataset YAML file. Default is 'data/coco128.yaml'.
         weights (list[str], optional): List of paths to model weight files. Default is 'yolov5s.pt'.
         batch_size (int, optional): Batch size for inference. Default is 32.
-        imgsz (int, optional): Inference image size in pixels. Default is 640.
+        imgsz (int, optional): Inference images size in pixels. Default is 640.
         conf_thres (float, optional): Confidence threshold for predictions. Default is 0.001.
         iou_thres (float, optional): IoU threshold for Non-Max Suppression (NMS). Default is 0.6.
-        max_det (int, optional): Maximum number of detections per image. Default is 300.
+        max_det (int, optional): Maximum number of detections per images. Default is 300.
         task (str, optional): Task type - options are 'train', 'val', 'test', 'speed', or 'study'. Default is 'val'.
         device (str, optional): Device to run the model on. e.g., '0' or '0,1,2,3' or 'cpu'. Default is empty to let the system choose automatically.
         workers (int, optional): Maximum number of dataloader workers per rank in DDP mode. Default is 8.
@@ -521,7 +521,7 @@ def parse_opt():
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="inference size (pixels)")
     parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
     parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
-    parser.add_argument("--max-det", type=int, default=300, help="maximum detections per image")
+    parser.add_argument("--max-det", type=int, default=300, help="maximum detections per images")
     parser.add_argument("--task", default="val", help="train, val, test, speed or study")
     parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--workers", type=int, default=8, help="max dataloader workers (per RANK in DDP mode)")
@@ -587,7 +587,7 @@ def main(opt):
             # python val.py --task study --data coco.yaml --iou 0.7 --weights yolov5n.pt yolov5s.pt...
             for opt.weights in weights:
                 f = f"study_{Path(opt.data).stem}_{Path(opt.weights).stem}.txt"  # filename to save to
-                x, y = list(range(256, 1536 + 128, 128)), []  # x axis (image sizes), y axis
+                x, y = list(range(256, 1536 + 128, 128)), []  # x axis (images sizes), y axis
                 for opt.imgsz in x:  # img-size
                     LOGGER.info(f"\nRunning {f} --imgsz {opt.imgsz}...")
                     r, _, t = run(**vars(opt), plots=False)

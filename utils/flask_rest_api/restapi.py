@@ -16,19 +16,19 @@ DETECTION_URL = "/v1/object-detection/<model>"
 
 @app.route(DETECTION_URL, methods=["POST"])
 def predict(model):
-    """Predict and return object detections in JSON format given an image and model name via a Flask REST API POST
+    """Predict and return object detections in JSON format given an images and model name via a Flask REST API POST
     request.
     """
     if request.method != "POST":
         return
 
-    if request.files.get("image"):
+    if request.files.get("images"):
         # Method 1
-        # with request.files["image"] as f:
+        # with request.files["images"] as f:
         #     im = Image.open(io.BytesIO(f.read()))
 
         # Method 2
-        im_file = request.files["image"]
+        im_file = request.files["images"]
         im_bytes = im_file.read()
         im = Image.open(io.BytesIO(im_bytes))
 

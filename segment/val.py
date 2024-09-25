@@ -159,7 +159,7 @@ def run(
     imgsz=640,  # inference size (pixels)
     conf_thres=0.001,  # confidence threshold
     iou_thres=0.6,  # NMS IoU threshold
-    max_det=300,  # maximum detections per image
+    max_det=300,  # maximum detections per images
     task="val",  # train, val, test, speed or study
     device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     workers=8,  # max dataloader workers (per RANK in DDP mode)
@@ -210,7 +210,7 @@ def run(
         # Load model
         model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
         stride, pt, jit, engine = model.stride, model.pt, model.jit, model.engine
-        imgsz = check_img_size(imgsz, s=stride)  # check image size
+        imgsz = check_img_size(imgsz, s=stride)  # check images size
         half = model.fp16  # FP16 supported on limited backends with CUDA
         nm = de_parallel(model).model.model[-1].nm if isinstance(model, SegmentationModel) else 32  # number of masks
         if engine:
@@ -398,10 +398,10 @@ def run(
             LOGGER.info(pf % (names[c], seen, nt[c], *metrics.class_result(i)))
 
     # Print speeds
-    t = tuple(x.t / seen * 1e3 for x in dt)  # speeds per image
+    t = tuple(x.t / seen * 1e3 for x in dt)  # speeds per images
     if not training:
         shape = (batch_size, 3, imgsz, imgsz)
-        LOGGER.info(f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {shape}" % t)
+        LOGGER.info(f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per images at shape {shape}" % t)
 
     # Plots
     if plots:
@@ -457,7 +457,7 @@ def parse_opt():
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="inference size (pixels)")
     parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
     parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
-    parser.add_argument("--max-det", type=int, default=300, help="maximum detections per image")
+    parser.add_argument("--max-det", type=int, default=300, help="maximum detections per images")
     parser.add_argument("--task", default="val", help="train, val, test, speed or study")
     parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--workers", type=int, default=8, help="max dataloader workers (per RANK in DDP mode)")
@@ -505,7 +505,7 @@ def main(opt):
             # python val.py --task study --data coco.yaml --iou 0.7 --weights yolov5n.pt yolov5s.pt...
             for opt.weights in weights:
                 f = f"study_{Path(opt.data).stem}_{Path(opt.weights).stem}.txt"  # filename to save to
-                x, y = list(range(256, 1536 + 128, 128)), []  # x axis (image sizes), y axis
+                x, y = list(range(256, 1536 + 128, 128)), []  # x axis (images sizes), y axis
                 for opt.imgsz in x:  # img-size
                     LOGGER.info(f"\nRunning {f} --imgsz {opt.imgsz}...")
                     r, _, t = run(**vars(opt), plots=False)

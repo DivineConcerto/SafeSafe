@@ -1,0 +1,5 @@
+train: ../images/train
+val: ../images/train
+
+nc: 2  # 类别数量
+names: ['with_helmet', 'without_helmet']

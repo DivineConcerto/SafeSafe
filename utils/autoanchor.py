@@ -26,7 +26,7 @@ def check_anchor_order(m):
 
 @TryExcept(f"{PREFIX}ERROR")
 def check_anchors(dataset, model, thr=4.0, imgsz=640):
-    """Evaluates anchor fit to dataset and adjusts if necessary, supporting customizable threshold and image size."""
+    """Evaluates anchor fit to dataset and adjusts if necessary, supporting customizable threshold and images size."""
     m = model.module.model[-1] if hasattr(model, "module") else model.model[-1]  # Detect()
     shapes = imgsz * dataset.shapes / dataset.shapes.max(1, keepdims=True)
     scale = np.random.uniform(0.9, 1.1, size=(shapes.shape[0], 1))  # augment scale
@@ -70,7 +70,7 @@ def kmean_anchors(dataset="./data/coco128.yaml", n=9, img_size=640, thr=4.0, gen
     Arguments:
         dataset: path to data.yaml, or a loaded dataset
         n: number of anchors
-        img_size: image size used for training
+        img_size: images size used for training
         thr: anchor-label wh ratio threshold hyperparameter hyp['anchor_t'] used for training, default=4.0
         gen: generations to evolve anchors using genetic algorithm
         verbose: print all results

@@ -165,7 +165,7 @@ def test(
 
     Args:
         weights (Path | str): Path to the model weights file (.pt format). Default is 'ROOT / "yolov5s.pt"'.
-        imgsz (int): Inference image size (in pixels). Default is 640.
+        imgsz (int): Inference images size (in pixels). Default is 640.
         batch_size (int): Batch size for testing. Default is 1.
         data (Path | str): Path to the dataset configuration file (.yaml format). Default is 'ROOT / "data/coco128.yaml"'.
         device (str): Device for running the tests, can be 'cpu' or a specific CUDA device ('0', '0,1,2,3', etc.). Default is an empty string.
@@ -262,7 +262,7 @@ def main(opt):
     Executes YOLOv5 benchmark tests or main training/inference routines based on the provided command-line arguments.
 
     Args:
-        opt (argparse.Namespace): Parsed command-line arguments including options for weights, image size, batch size, data
+        opt (argparse.Namespace): Parsed command-line arguments including options for weights, images size, batch size, data
             configuration, device, and other flags for inference settings.
 
     Returns:
@@ -282,7 +282,7 @@ def main(opt):
           the [main repository](https://github.com/ultralytics/yolov5#installation).
 
         ```shell
-        # Running benchmarks on default weights and image size
+        # Running benchmarks on default weights and images size
         $ python benchmarks.py --weights yolov5s.pt --img 640
         ```
     """

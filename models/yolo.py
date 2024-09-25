@@ -198,7 +198,7 @@ class BaseModel(nn.Module):
         return self
 
     def info(self, verbose=False, img_size=640):
-        """Prints model information given verbosity and image size, e.g., `info(verbose=True, img_size=640)`."""
+        """Prints model information given verbosity and images size, e.g., `info(verbose=True, img_size=640)`."""
         model_info(self, verbose, img_size)
 
     def _apply(self, fn):
@@ -285,7 +285,7 @@ class DetectionModel(BaseModel):
         return torch.cat(y, 1), None  # augmented inference, train
 
     def _descale_pred(self, p, flips, scale, img_size):
-        """De-scales predictions from augmented inference, adjusting for flips and image size."""
+        """De-scales predictions from augmented inference, adjusting for flips and images size."""
         if self.inplace:
             p[..., :4] /= scale  # de-scale
             if flips == 2:
@@ -324,7 +324,7 @@ class DetectionModel(BaseModel):
         m = self.model[-1]  # Detect() module
         for mi, s in zip(m.m, m.stride):  # from
             b = mi.bias.view(m.na, -1)  # conv.bias(255) to (3,85)
-            b.data[:, 4] += math.log(8 / (640 / s) ** 2)  # obj (8 objects per 640 image)
+            b.data[:, 4] += math.log(8 / (640 / s) ** 2)  # obj (8 objects per 640 images)
             b.data[:, 5 : 5 + m.nc] += (
                 math.log(0.6 / (m.nc - 0.99999)) if cf is None else torch.log(cf / cf.sum())
             )  # cls
@@ -343,7 +343,7 @@ class SegmentationModel(DetectionModel):
 
 
 class ClassificationModel(BaseModel):
-    """YOLOv5 classification model for image classification tasks, initialized with a config file or detection model."""
+    """YOLOv5 classification model for images classification tasks, initialized with a config file or detection model."""
 
     def __init__(self, cfg=None, model=None, nc=1000, cutoff=10):
         """Initializes YOLOv5 model with config file `cfg`, input channels `ch`, number of classes `nc`, and `cuttoff`

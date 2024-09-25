@@ -145,7 +145,7 @@ class ComputeLoss:
 
         # Losses
         for i, pi in enumerate(p):  # layer index, layer predictions
-            b, a, gj, gi = indices[i]  # image, anchor, gridy, gridx
+            b, a, gj, gi = indices[i]  # images, anchor, gridy, gridx
             tobj = torch.zeros(pi.shape[:4], dtype=pi.dtype, device=self.device)  # target obj
 
             n = b.shape[0]  # number of targets
@@ -194,7 +194,7 @@ class ComputeLoss:
         return (lbox + lobj + lcls) * bs, torch.cat((lbox, lobj, lcls)).detach()
 
     def build_targets(self, p, targets):
-        """Prepares model targets from input targets (image,class,x,y,w,h) for loss computation, returning class, box,
+        """Prepares model targets from input targets (images,class,x,y,w,h) for loss computation, returning class, box,
         indices, and anchors.
         """
         na, nt = self.na, targets.shape[0]  # number of anchors, targets
@@ -245,13 +245,13 @@ class ComputeLoss:
                 offsets = 0
 
             # Define
-            bc, gxy, gwh, a = t.chunk(4, 1)  # (image, class), grid xy, grid wh, anchors
-            a, (b, c) = a.long().view(-1), bc.long().T  # anchors, image, class
+            bc, gxy, gwh, a = t.chunk(4, 1)  # (images, class), grid xy, grid wh, anchors
+            a, (b, c) = a.long().view(-1), bc.long().T  # anchors, images, class
             gij = (gxy - offsets).long()
             gi, gj = gij.T  # grid indices
 
             # Append
-            indices.append((b, a, gj.clamp_(0, shape[2] - 1), gi.clamp_(0, shape[3] - 1)))  # image, anchor, grid
+            indices.append((b, a, gj.clamp_(0, shape[2] - 1), gi.clamp_(0, shape[3] - 1)))  # images, anchor, grid
             tbox.append(torch.cat((gxy - gij, gwh), 1))  # box
             anch.append(anchors[a])  # anchors
             tcls.append(c)  # class

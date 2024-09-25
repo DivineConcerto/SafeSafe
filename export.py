@@ -95,7 +95,7 @@ class iOSModel(torch.nn.Module):
 
     def __init__(self, model, im):
         """
-        Initializes an iOS compatible model with normalization based on image dimensions.
+        Initializes an iOS compatible model with normalization based on images dimensions.
 
         Args:
             model (torch.nn.Module): The PyTorch model to be adapted for iOS compatibility.
@@ -105,9 +105,9 @@ class iOSModel(torch.nn.Module):
             None: This method does not return any value.
 
         Notes:
-            This initializer configures normalization based on the input image dimensions, which is critical for
+            This initializer configures normalization based on the input images dimensions, which is critical for
             ensuring the model's compatibility and proper functionality on iOS devices. The normalization step
-            involves dividing by the image width if the image is square; otherwise, additional conditions might apply.
+            involves dividing by the images width if the images is square; otherwise, additional conditions might apply.
         """
         super().__init__()
         b, c, h, w = im.shape  # batch, channel, height, width
@@ -125,7 +125,7 @@ class iOSModel(torch.nn.Module):
         Run a forward pass on the input tensor, returning class confidences and normalized coordinates.
 
         Args:
-            x (torch.Tensor): Input tensor containing the image data with shape (batch, channels, height, width).
+            x (torch.Tensor): Input tensor containing the images data with shape (batch, channels, height, width).
 
         Returns:
             torch.Tensor: Concatenated tensor with normalized coordinates (xywh), confidence scores (conf),
@@ -244,7 +244,7 @@ def export_torchscript(model, im, file, optimize, prefix=colorstr("TorchScript:"
 
     Notes:
         - This function uses tracing to create the TorchScript model.
-        - Metadata, including the input image shape, model stride, and class names, is saved in an extra file (`config.txt`)
+        - Metadata, including the input images shape, model stride, and class names, is saved in an extra file (`config.txt`)
           within the TorchScript model package.
         - For mobile optimization, refer to the PyTorch tutorial: https://pytorch.org/tutorials/recipes/mobile_interpreter.html
 
@@ -458,7 +458,7 @@ def export_openvino(file, metadata, half, int8, data, prefix=colorstr("OpenVINO:
             Returns:
                 input_tensor: Input data for quantization
             """
-            assert data_item[0].dtype == torch.uint8, "input image must be uint8 for the quantization preprocessing"
+            assert data_item[0].dtype == torch.uint8, "input images must be uint8 for the quantization preprocessing"
 
             img = data_item[0].numpy().astype(np.float32)  # uint8 to fp16/32
             img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -572,7 +572,7 @@ def export_coreml(model, im, file, int8, half, nms, mlmodel, prefix=colorstr("Co
     ts = torch.jit.trace(model, im, strict=False)  # TorchScript model
     ct_model = ct.convert(
         ts,
-        inputs=[ct.ImageType("image", shape=im.shape, scale=1 / 255, bias=[0, 0, 0])],
+        inputs=[ct.ImageType("images", shape=im.shape, scale=1 / 255, bias=[0, 0, 0])],
         convert_to=convert_to,
         compute_precision=precision,
     )
@@ -836,7 +836,7 @@ def export_tflite(
 
     Args:
         keras_model (tf.keras.Model): The Keras model to be exported.
-        im (torch.Tensor): An input image tensor for normalization and model tracing.
+        im (torch.Tensor): An input images tensor for normalization and model tracing.
         file (Path): The file path to save the TensorFlow Lite model.
         int8 (bool): Enables INT8 quantization if True.
         per_tensor (bool): If True, disables per-channel quantization.
@@ -1145,7 +1145,7 @@ def pipeline_coreml(model, im, file, names, y, mlmodel, prefix=colorstr("CoreML 
     if platform.system() == "Darwin":
         img = Image.new("RGB", (w, h))  # img(192 width, 320 height)
         # img = torch.zeros((*opt.img_size, 3)).numpy()  # img size(320,192,3) iDetection
-        out = model.predict({"image": img})
+        out = model.predict({"images": img})
         out0_shape, out1_shape = out[out0.name].shape, out[out1.name].shape
     else:  # linux and windows can not run model.predict(), get sizes from pytorch output y
         s = tuple(y[0].shape)
@@ -1167,11 +1167,11 @@ def pipeline_coreml(model, im, file, names, y, mlmodel, prefix=colorstr("CoreML 
     # s = [] # shapes
     # s.append(flexible_shape_utils.NeuralNetworkImageSize(320, 192))
     # s.append(flexible_shape_utils.NeuralNetworkImageSize(640, 384))  # (height, width)
-    # flexible_shape_utils.add_enumerated_image_sizes(spec, feature_name='image', sizes=s)
+    # flexible_shape_utils.add_enumerated_image_sizes(spec, feature_name='images', sizes=s)
     # r = flexible_shape_utils.NeuralNetworkImageSizeRange()  # shape ranges
     # r.add_height_range((192, 640))
     # r.add_width_range((192, 640))
-    # flexible_shape_utils.update_image_size_range(spec, feature_name='image', size_range=r)
+    # flexible_shape_utils.update_image_size_range(spec, feature_name='images', size_range=r)
 
     # Print
     print(spec.description)
@@ -1221,7 +1221,7 @@ def pipeline_coreml(model, im, file, names, y, mlmodel, prefix=colorstr("CoreML 
     # 4. Pipeline models together
     pipeline = ct.models.pipeline.Pipeline(
         input_features=[
-            ("image", ct.models.datatypes.Array(3, ny, nx)),
+            ("images", ct.models.datatypes.Array(3, ny, nx)),
             ("iouThreshold", ct.models.datatypes.Double()),
             ("confidenceThreshold", ct.models.datatypes.Double()),
         ],
@@ -1251,13 +1251,13 @@ def pipeline_coreml(model, im, file, names, y, mlmodel, prefix=colorstr("CoreML 
 
     # Save the model
     model = ct.models.MLModel(pipeline.spec, weights_dir=weights_dir)
-    model.input_description["image"] = "Input image"
+    model.input_description["images"] = "Input images"
     model.input_description["iouThreshold"] = f"(optional) IOU Threshold override (default: {nms.iouThreshold})"
     model.input_description["confidenceThreshold"] = (
         f"(optional) Confidence Threshold override (default: {nms.confidenceThreshold})"
     )
     model.output_description["confidence"] = 'Boxes × Class confidence (see user-defined metadata "classes")'
-    model.output_description["coordinates"] = "Boxes × [x, y, width, height] (relative to image size)"
+    model.output_description["coordinates"] = "Boxes × [x, y, width, height] (relative to images size)"
     model.save(f)  # pipelined
     print(f"{prefix} pipeline success ({time.time() - t:.2f}s), saved as {f} ({file_size(f):.1f} MB)")
 
@@ -1266,7 +1266,7 @@ def pipeline_coreml(model, im, file, names, y, mlmodel, prefix=colorstr("CoreML 
 def run(
     data=ROOT / "data/coco128.yaml",  # 'dataset.yaml path'
     weights=ROOT / "yolov5s.pt",  # weights path
-    imgsz=(640, 640),  # image (height, width)
+    imgsz=(640, 640),  # images (height, width)
     batch_size=1,  # batch size
     device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     include=("torchscript", "onnx"),  # include formats
@@ -1378,7 +1378,7 @@ def run(
     # Input
     gs = int(max(model.stride))  # grid size (max stride)
     imgsz = [check_img_size(x, gs) for x in imgsz]  # verify img_size are gs-multiples
-    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # image size(1,3,320,192) BCHW iDetection
+    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # images size(1,3,320,192) BCHW iDetection
 
     # Update model
     model.eval()
@@ -1487,7 +1487,7 @@ def parse_opt(known=False):
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default=ROOT / "data/coco128.yaml", help="dataset.yaml path")
     parser.add_argument("--weights", nargs="+", type=str, default=ROOT / "yolov5s.pt", help="model.pt path(s)")
-    parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640, 640], help="image (h, w)")
+    parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640, 640], help="images (h, w)")
     parser.add_argument("--batch-size", type=int, default=1, help="batch size")
     parser.add_argument("--device", default="cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--half", action="store_true", help="FP16 half-precision export")

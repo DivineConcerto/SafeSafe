@@ -436,7 +436,7 @@ def check_version(current="0.0.0", minimum="0.0.0", name="version ", pinned=Fals
 
 
 def check_img_size(imgsz, s=32, floor=0):
-    """Adjusts image size to be divisible by stride `s`, supports int or list/tuple input, returns adjusted size."""
+    """Adjusts images size to be divisible by stride `s`, supports int or list/tuple input, returns adjusted size."""
     if isinstance(imgsz, int):  # integer i.e. img_size=640
         new_size = max(make_divisible(imgsz, int(s)), floor)
     else:  # list i.e. img_size=[640, 480]
@@ -448,7 +448,7 @@ def check_img_size(imgsz, s=32, floor=0):
 
 
 def check_imshow(warn=False):
-    """Checks environment support for image display; warns on failure if `warn=True`."""
+    """Checks environment support for images display; warns on failure if `warn=True`."""
     try:
         assert not is_jupyter()
         assert not is_docker()
@@ -600,7 +600,7 @@ def check_amp(model):
     device = next(model.parameters()).device  # get model device
     if device.type in ("cpu", "mps"):
         return False  # AMP only used on CUDA devices
-    f = ROOT / "data" / "images" / "bus.jpg"  # image to check
+    f = ROOT / "data" / "images" / "bus.jpg"  # images to check
     im = f if f.exists() else "https://ultralytics.com/images/bus.jpg" if check_online() else np.ones((640, 640, 3))
     try:
         assert amp_allclose(deepcopy(model), im) or amp_allclose(DetectMultiBackend("yolov5n.pt", device), im)
@@ -761,7 +761,7 @@ def labels_to_class_weights(labels, nc=80):
     weights = np.bincount(classes, minlength=nc)  # occurrences per class
 
     # Prepend gridpoint count (for uCE training)
-    # gpi = ((320 / 32 * np.array([1, 2, 4])) ** 2 * 3).sum()  # gridpoints per image
+    # gpi = ((320 / 32 * np.array([1, 2, 4])) ** 2 * 3).sum()  # gridpoints per images
     # weights = np.hstack([gpi * len(labels)  - weights.sum() * 9, weights * 9]) ** 0.5  # prepend gridpoints to start
 
     weights[weights == 0] = 1  # replace empty bins with 1
@@ -771,8 +771,8 @@ def labels_to_class_weights(labels, nc=80):
 
 
 def labels_to_image_weights(labels, nc=80, class_weights=np.ones(80)):
-    """Calculates image weights from labels using class weights for weighted sampling."""
-    # Usage: index = random.choices(range(n), weights=image_weights, k=1)  # weighted image sample
+    """Calculates images weights from labels using class weights for weighted sampling."""
+    # Usage: index = random.choices(range(n), weights=image_weights, k=1)  # weighted images sample
     class_counts = np.array([np.bincount(x[:, 0].astype(int), minlength=nc) for x in labels])
     return (class_weights.reshape(1, nc) * class_counts).sum(1)
 
@@ -922,7 +922,7 @@ def xyn2xy(x, w=640, h=640, padw=0, padh=0):
 
 
 def segment2box(segment, width=640, height=640):
-    """Convert 1 segment label to 1 box label, applying inside-image constraint, i.e. (xy1, xy2, ...) to (xyxy)."""
+    """Convert 1 segment label to 1 box label, applying inside-images constraint, i.e. (xy1, xy2, ...) to (xyxy)."""
     x, y = segment.T  # segment xy
     inside = (x >= 0) & (y >= 0) & (x <= width) & (y <= height)
     (
@@ -987,7 +987,7 @@ def scale_segments(img1_shape, segments, img0_shape, ratio_pad=None, normalize=F
 
 
 def clip_boxes(boxes, shape):
-    """Clips bounding box coordinates (xyxy) to fit within the specified image shape (height, width)."""
+    """Clips bounding box coordinates (xyxy) to fit within the specified images shape (height, width)."""
     if isinstance(boxes, torch.Tensor):  # faster individually
         boxes[..., 0].clamp_(0, shape[1])  # x1
         boxes[..., 1].clamp_(0, shape[0])  # y1
@@ -999,7 +999,7 @@ def clip_boxes(boxes, shape):
 
 
 def clip_segments(segments, shape):
-    """Clips segment coordinates (xy1, xy2, ...) to an image's boundaries given its shape (height, width)."""
+    """Clips segment coordinates (xy1, xy2, ...) to an images's boundaries given its shape (height, width)."""
     if isinstance(segments, torch.Tensor):  # faster individually
         segments[:, 0].clamp_(0, shape[1])  # x
         segments[:, 1].clamp_(0, shape[0])  # y
@@ -1023,7 +1023,7 @@ def non_max_suppression(
     Non-Maximum Suppression (NMS) on inference results to reject overlapping detections.
 
     Returns:
-         list of detections, on (n,6) tensor per image [xyxy, conf, cls]
+         list of detections, on (n,6) tensor per images [xyxy, conf, cls]
     """
     # Checks
     assert 0 <= conf_thres <= 1, f"Invalid Confidence threshold {conf_thres}, valid values are between 0.0 and 1.0"
@@ -1051,7 +1051,7 @@ def non_max_suppression(
     t = time.time()
     mi = 5 + nc  # mask start index
     output = [torch.zeros((0, 6 + nm), device=prediction.device)] * bs
-    for xi, x in enumerate(prediction):  # image index, image inference
+    for xi, x in enumerate(prediction):  # images index, images inference
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
         x = x[xc[xi]]  # confidence
@@ -1065,7 +1065,7 @@ def non_max_suppression(
             v[range(len(lb)), lb[:, 0].long() + 5] = 1.0  # cls
             x = torch.cat((x, v), 0)
 
-        # If none remain process next image
+        # If none remain process next images
         if not x.shape[0]:
             continue
 
@@ -1201,7 +1201,7 @@ def apply_classifier(x, model, img, im0):
     """Applies second-stage classifier to YOLO outputs, filtering detections by class match."""
     # Example model = torchvision.models.__dict__['efficientnet_b0'](pretrained=True).to(device).eval()
     im0 = [im0] if isinstance(im0, np.ndarray) else im0
-    for i, d in enumerate(x):  # per image
+    for i, d in enumerate(x):  # per images
         if d is not None and len(d):
             d = d.clone()
 
@@ -1268,14 +1268,14 @@ imshow_ = cv2.imshow  # copy to avoid recursion errors
 
 
 def imread(filename, flags=cv2.IMREAD_COLOR):
-    """Reads an image from a file and returns it as a numpy array, using OpenCV's imdecode to support multilanguage
+    """Reads an images from a file and returns it as a numpy array, using OpenCV's imdecode to support multilanguage
     paths.
     """
     return cv2.imdecode(np.fromfile(filename, np.uint8), flags)
 
 
 def imwrite(filename, img):
-    """Writes an image to a file, returns True on success and False on failure, supports multilanguage paths."""
+    """Writes an images to a file, returns True on success and False on failure, supports multilanguage paths."""
     try:
         cv2.imencode(Path(filename).suffix, img)[1].tofile(filename)
         return True
@@ -1284,7 +1284,7 @@ def imwrite(filename, img):
 
 
 def imshow(path, im):
-    """Displays an image using Unicode path, requires encoded path and image matrix as input."""
+    """Displays an images using Unicode path, requires encoded path and images matrix as input."""
     imshow_(path.encode("unicode_escape").decode(), im)
 
 

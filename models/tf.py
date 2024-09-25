@@ -390,7 +390,7 @@ class TFDetect(keras.layers.Layer):
     """Implements YOLOv5 object detection layer in TensorFlow for predicting bounding boxes and class probabilities."""
 
     def __init__(self, nc=80, anchors=(), ch=(), imgsz=(640, 640), w=None):
-        """Initializes YOLOv5 detection layer for TensorFlow with configurable classes, anchors, channels, and image
+        """Initializes YOLOv5 detection layer for TensorFlow with configurable classes, anchors, channels, and images
         size.
         """
         super().__init__()
@@ -754,13 +754,13 @@ def run(
 ):
     # PyTorch model
     """Exports YOLOv5 model from PyTorch to TensorFlow and Keras formats, performing inference for validation."""
-    im = torch.zeros((batch_size, 3, *imgsz))  # BCHW image
+    im = torch.zeros((batch_size, 3, *imgsz))  # BCHW images
     model = attempt_load(weights, device=torch.device("cpu"), inplace=True, fuse=False)
     _ = model(im)  # inference
     model.info()
 
     # TensorFlow model
-    im = tf.zeros((batch_size, *imgsz, 3))  # BHWC image
+    im = tf.zeros((batch_size, *imgsz, 3))  # BHWC images
     tf_model = TFModel(cfg=model.yaml, model=model, nc=model.nc, imgsz=imgsz)
     _ = tf_model.predict(im)  # inference
 
@@ -773,7 +773,7 @@ def run(
 
 
 def parse_opt():
-    """Parses and returns command-line options for model inference, including weights path, image size, batch size, and
+    """Parses and returns command-line options for model inference, including weights path, images size, batch size, and
     dynamic batching.
     """
     parser = argparse.ArgumentParser()
